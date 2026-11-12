@@ -70,7 +70,15 @@ export class Input {
   }
 
   lockPointer() {
-    this.canvas.requestPointerLock?.();
+    /* قفل المؤشر يحتاج إيماءة مستخدم. لو المتصفح رفض (NotAllowedError)
+       نبتلعه بهدوء — الدوران بالسحب يضل شغّال، وما لازم يرمي استثناء
+       يوقف startLevel/resume في منتصفها (كان يجمّد اللعبة على الهاتف). */
+    try {
+      const p = this.canvas.requestPointerLock?.();
+      if (p && typeof p.catch === "function") p.catch(() => {});
+    } catch {
+      /* غير مدعوم أو مرفوض */
+    }
   }
 
   unlock() {

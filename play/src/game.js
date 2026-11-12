@@ -266,7 +266,6 @@ export class Game {
     document.body.classList.add("playing");
     this.input.reset();
     this.input.enabled = true;
-    this.input.lockPointer();
     setVolume(this.profile.settings.sound);
     startAmbient(def.id === 2 ? "subway" : def.id === 5 ? "lab" : "city");
     this.waveIndex = 0;
@@ -278,6 +277,8 @@ export class Game {
     this.hud.toast(`${def.nameAr} — ${def.name}`, "good");
     this.hud.hint(this.input.isTouch ? "العصا للحركة · اسحب لليمين للنظر · زر النار للقتال" : "WASD للحركة · الفأرة للتصويب · زر الفأرة للإطلاق · R للتلقيم");
     this.openScreenClear();
+    /* آخر خطوة: أي فشل في قفل المؤشر ما بيوقف تهيئة المرحلة */
+    this.input.lockPointer();
   }
 
   openScreenClear() {
@@ -670,8 +671,8 @@ export class Game {
     this.ui.hide();
     this.input.enabled = true;
     this.input.reset();
-    this.input.lockPointer();
     document.body.classList.add("playing");
+    this.input.lockPointer();
   }
 
   endRun(win) {

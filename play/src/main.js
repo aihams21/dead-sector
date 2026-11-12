@@ -76,7 +76,9 @@ const gateNote = document.getElementById("gate-note");
 let gatePaused = false;
 
 /* بوابة «لفّ الجهاز»: تظهر فقط على الهاتف بالطول وأثناء اللعب */
+let gateDismissed = false;
 function gateActive() {
+  if (gateDismissed) return false;
   return (
     document.body.classList.contains("is-touch") &&
     document.body.classList.contains("portrait") &&
@@ -97,11 +99,23 @@ function syncGate() {
 }
 
 function applyOrientation() {
-  const portrait = portraitMQ.matches;
+  /* الاعتماد على أبعاد النافذة: أضمن من matchMedia داخل fullscreen
+     على أندرويد (screen.orientation قد يبقى قديماً أثناء القفل) */
+  const portrait = window.innerHeight > window.innerWidth;
   document.body.classList.toggle("portrait", portrait);
   document.body.classList.toggle("landscape", !portrait);
   syncGate();
 }
+
+/* حرّاس إضافيون: بعض الهواتف ما تطلق حدث دوران داخل fullscreen،
+   فتضل البوابة ظاهرة وتحجب كل الأزرار. فحص دوري رخيص = صفر تعليق. */
+let lastOrientKey = "";
+setInterval(() => {
+  const key = `${window.innerHeight > window.innerWidth}|${document.body.classList.contains("playing")}`;
+  if (key === lastOrientKey) return;
+  lastOrientKey = key;
+  applyOrientation();
+}, 700);
 portraitMQ.addEventListener?.("change", applyOrientation);
 try {
   screen.orientation?.addEventListener?.("change", () => setTimeout(applyOrientation, 60));
@@ -143,6 +157,17 @@ async function handleFullscreen() {
 }
 
 document.addEventListener("click", (e) => {
+  const skip = e.target.closest('[data-action="gate-skip"]');
+  if (skip) {
+    e.preventDefault();
+    e.stopPropagation();
+    /* مخرج أمان: نلعب بالطول بدل ما نضل محبوسين ورا البوابة */
+    gateDismissed = true;
+    document.body.classList.add("gate-off");
+    if (game && game.state === "paused") game.resume();
+    syncGate();
+    return;
+  }
   const btn = e.target.closest('[data-action="fullscreen"]');
   if (!btn) return;
   e.preventDefault();
@@ -155,6 +180,9 @@ document.addEventListener(
   "click",
   (e) => {
     if (!touch || !e.target.closest('[data-action="play"], [data-action="endless"]')) return;
+    /* بداية مرحلة جديدة: أعد تفعيل بوابة الاتجاه */
+    gateDismissed = false;
+    document.body.classList.remove("gate-off");
     if (isFullscreen()) return;
     void (async () => {
       if (await enterFullscreen()) await lockLandscape();
