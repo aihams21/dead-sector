@@ -11,7 +11,11 @@ export class Input {
     this.switchQueued = 0;
     this.slotQueued = null;
     this.pausedRequested = false;
-    this.isTouch = matchMedia("(pointer: coarse)").matches || "ontouchstart" in window;
+    /* لمس حقيقي = مؤشّر خشن أو جهاز بلا hover. لا نستعمل "ontouchstart"
+       لأن لابتوبات بشاشة لمس بتطلع true فتُخفي الفأرة والكيبورد عن اللعبة */
+    this.isTouch = matchMedia("(pointer: coarse)").matches || matchMedia("(hover: none)").matches;
+    this._dragging = false;
+    this._wasLocked = false;
     this.pointerLocked = false;
     this.sensitivity = 1;
     this.invert = false;
@@ -37,25 +41,35 @@ export class Input {
     addEventListener("blur", () => { this.keys.clear(); this.fire = false; });
 
     document.addEventListener("mousemove", (e) => {
-      if (!this.pointerLocked || !this.enabled) return;
+      if (!this.enabled) return;
+      /* دوران بالـpointer lock، أو بالسحب لو المتصفح رفض القفل */
+      if (!this.pointerLocked && !this._dragging) return;
       this.look.dx += e.movementX * 0.0022 * this.sensitivity;
       this.look.dy += e.movementY * 0.0022 * this.sensitivity * (this.invert ? -1 : 1);
     });
     this.canvas.addEventListener("mousedown", (e) => {
       if (!this.enabled) return;
-      if (e.button === 0) this.fire = true;
-      if (!this.pointerLocked && !this.isTouch) this.lockPointer();
+      if (e.button === 0) {
+        this.fire = true;
+        this._dragging = true; /* دوران بالسحب كخطة بديلة */
+      }
+      if (!this.pointerLocked) this.lockPointer();
     });
-    addEventListener("mouseup", (e) => { if (e.button === 0) this.fire = false; });
+    addEventListener("mouseup", (e) => {
+      if (e.button === 0) { this.fire = false; this._dragging = false; }
+    });
     document.addEventListener("pointerlockchange", () => {
       this.pointerLocked = document.pointerLockElement === this.canvas;
-      if (!this.pointerLocked && this.enabled) this.pausedRequested = true;
+      if (this.pointerLocked) this._wasLocked = true;
+      else if (this.enabled && this._wasLocked) {
+        this._wasLocked = false;
+        this.pausedRequested = true;
+      }
     });
     this.bindTouch();
   }
 
   lockPointer() {
-    if (this.isTouch) return;
     this.canvas.requestPointerLock?.();
   }
 
@@ -132,27 +146,29 @@ export class Input {
     joy.addEventListener("pointerup", endJoy);
     joy.addEventListener("pointercancel", endJoy);
 
-    if (lookZone) {
-      let lookId = null;
-      let lookPos = { x: 0, y: 0 };
-      lookZone.addEventListener("pointerdown", (e) => {
-        if (joyId !== null) return; /* العصا عندها الأولوية */
-        lookId = e.pointerId;
-        lookPos = { x: e.clientX, y: e.clientY };
-        try { lookZone.setPointerCapture(lookId); } catch { /* ignore */ }
-      });
-      lookZone.addEventListener("pointermove", (e) => {
-        if (e.pointerId !== lookId) return;
-        this.look.dx += (e.clientX - lookPos.x) * 0.0042 * this.sensitivity;
-        this.look.dy += (e.clientY - lookPos.y) * 0.0042 * this.sensitivity * (this.invert ? -1 : 1);
-        lookPos = { x: e.clientX, y: e.clientY };
-      });
-      const endLook = (e) => {
-        if (e.pointerId === lookId) lookId = null;
-      };
-      lookZone.addEventListener("pointerup", endLook);
-      lookZone.addEventListener("pointercancel", endLook);
-    }
+    /* النظر: مستمع على النافذة كلها — لمس/قلم فقط.
+       فأرة اللابتوب تمرّ للـcanvas (pointer lock) حتى لا تتعارض
+       مع الأجهزة الهجينة (لابتوب بشاشة لمس). */
+    let lookId = null;
+    let lookPos = { x: 0, y: 0 };
+    const LOOK_BLOCK = "#joy, .touch-pad, #btn-pause, .screen, #gate";
+    addEventListener("pointerdown", (e) => {
+      if (e.pointerType === "mouse") return;
+      if (e.target?.closest?.(LOOK_BLOCK)) return;
+      lookId = e.pointerId;
+      lookPos = { x: e.clientX, y: e.clientY };
+    }, { passive: true });
+    addEventListener("pointermove", (e) => {
+      if (e.pointerId !== lookId) return;
+      this.look.dx += (e.clientX - lookPos.x) * 0.0042 * this.sensitivity;
+      this.look.dy += (e.clientY - lookPos.y) * 0.0042 * this.sensitivity * (this.invert ? -1 : 1);
+      lookPos = { x: e.clientX, y: e.clientY };
+    }, { passive: true });
+    const endLook = (e) => {
+      if (e.pointerId === lookId) lookId = null;
+    };
+    addEventListener("pointerup", endLook);
+    addEventListener("pointercancel", endLook);
 
     hold(fireBtn, () => { this.fire = true; }, () => { this.fire = false; });
     hold(document.getElementById("btn-reload"), () => { this.reloadQueued = true; });
@@ -168,15 +184,19 @@ export class Input {
   }
 
   update() {
-    if (!this.isTouch) {
-      let x = 0, y = 0;
-      if (this.keys.has("KeyW") || this.keys.has("ArrowUp")) y += 1;
-      if (this.keys.has("KeyS") || this.keys.has("ArrowDown")) y -= 1;
-      if (this.keys.has("KeyD") || this.keys.has("ArrowRight")) x += 1;
-      if (this.keys.has("KeyA") || this.keys.has("ArrowLeft")) x -= 1;
+    let x = 0, y = 0;
+    if (this.keys.has("KeyW") || this.keys.has("ArrowUp")) y += 1;
+    if (this.keys.has("KeyS") || this.keys.has("ArrowDown")) y -= 1;
+    if (this.keys.has("KeyD") || this.keys.has("ArrowRight")) x += 1;
+    if (this.keys.has("KeyA") || this.keys.has("ArrowLeft")) x -= 1;
+    if (x || y) {
       const len = Math.hypot(x, y) || 1;
       this.move.x = x / len;
       this.move.y = y / len;
+    } else if (!this.isTouch) {
+      /* بلا مفاتيح على الكيبورد: صفّر — على اللمس العصا هي المصدر */
+      this.move.x = 0;
+      this.move.y = 0;
     }
   }
 
@@ -194,5 +214,6 @@ export class Input {
     this.switchQueued = 0;
     this.slotQueued = null;
     this.pausedRequested = false;
+    this._dragging = false;
   }
 }

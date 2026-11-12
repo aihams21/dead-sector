@@ -482,13 +482,16 @@ body.is-touch.playing #touch-ui {
 
 /* #hud عنده pointer-events:none — لازم كل عنصر لمس يعيد تفعيلها،
    وإلا الأزرار بتستقبل صفر أحداث (هذا كان سبب تعطّل الأزرار على الهاتف) */
-#look-zone, #joy, .touch-pad, #touch-ui #btn-pause { pointer-events: auto; }
+#joy, .touch-pad, #touch-ui #btn-pause { pointer-events: auto; }
 
 #look-zone {
   position: fixed;
   inset: 0;
   z-index: 1;
   touch-action: none;
+  /* شفافة للفأرة: النظر يُقرأ من مستمع على النافذة (لمس/قلم فقط)،
+     فتصل نقرة الفأرة للـcanvas ويشتغل pointer lock + الإطلاق */
+  pointer-events: none;
 }
 
 #joy {
@@ -1540,11 +1543,11 @@ input[type="checkbox"] {
 /* أجهزة اللمس: أهداف لمس مريحة + أصغر خط مقروء */
 @media (pointer: coarse) {
   .btn, .back, .tab, .chip, .menu-item, .nav button {
-    min-height: 44px;
+    min-height: 46px;
     touch-action: manipulation;
   }
   .btn.small { padding-block: 12px; font-size: 13px; }
-  .tab { padding-block: 11px; }
+  .tab { padding-block: 13px; }
   .chip { padding-block: 9px; font-size: 12px; }
   .tag, .badge, .stat-label, .level-card .meta, .weapon-specs span { font-size: 11.5px; }
   .menu-item { padding-block: 16px; }

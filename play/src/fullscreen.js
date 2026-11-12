@@ -88,7 +88,7 @@ export function unlockOrientation() {
 
 export const isTouchDevice = () =>
   typeof window !== "undefined" &&
-  (matchMedia("(pointer: coarse)").matches || "ontouchstart" in window);
+  (matchMedia("(pointer: coarse)").matches || matchMedia("(hover: none)").matches);
 
 /* متابعة تغيّر حالة ملء الشاشة (لاستبدال نص الأزرار) */
 export function onFullscreenChange(handler) {
