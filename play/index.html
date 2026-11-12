@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#07080a" />
+<title>DEAD SECTOR — القطاع الميت</title>
+<meta name="description" content="لعبة تصويب زومبي ثلاثية الأبعاد بمنظور الشخص الأول. 5 مراحل، زعماء، أسلحة وترقيات، وتعمل على الهاتف واللابتوب." />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<div id="boot">
+  <div class="boot-logo">DEAD<span>SECTOR</span></div>
+  <div class="boot-bar"><i></i></div>
+  <p>جارٍ تحضير القطاع…</p>
+</div>
+
+<!-- ===================== HUD ===================== -->
+<div id="hud">
+  <div id="vignette"></div>
+  <div class="hud-top">
+    <div class="hud-wallet">
+      <span class="hud-pill coin">₡ <b id="hud-coins">0</b></span>
+      <span class="hud-pill gem">✦ <b id="hud-gems">0</b></span>
+    </div>
+    <div class="hud-wave">
+      <span id="wave-label">الموجة 1 / 3</span>
+      <div class="wave-track"><i id="wave-fill"></i></div>
+      <span id="wave-sub">—</span>
+    </div>
+    <div class="hud-right">
+      <span class="hud-stat">☠ <b id="hud-kills">0</b></span>
+      <span class="hud-stat" id="hud-timer">00:00</span>
+    </div>
+  </div>
+
+  <div id="boss-bar">
+    <span id="boss-name">الوحش</span>
+    <div class="boss-track"><i id="boss-fill"></i></div>
+  </div>
+
+  <div id="crosshair"><span></span><span></span><span></span><span></span><em></em></div>
+  <div id="hitmarker"><i></i><i></i><i></i><i></i></div>
+  <div id="floats"></div>
+  <div id="toasts"></div>
+  <div id="hud-hint"></div>
+
+  <div class="hud-bottom">
+    <div class="vitals">
+      <div class="hp-row">
+        <span class="hp-ico">+</span>
+        <div class="hp-track"><i id="hp-fill"></i></div>
+        <b id="hp-text">100</b>
+      </div>
+      <div class="mini-tracks">
+        <div class="track armor"><i id="armor-fill"></i></div>
+        <div class="track stam"><i id="stamina-fill"></i></div>
+      </div>
+    </div>
+    <div class="ammo">
+      <span id="weapon-name">مسدس الخدمة</span>
+      <div class="ammo-row"><b id="ammo-cur">12</b><span>/</span><em id="ammo-res">120</em></div>
+      <div class="reload"><i id="reload-bar"></i></div>
+    </div>
+  </div>
+
+  <!-- أزرار اللمس -->
+  <div id="touch-ui">
+    <div id="look-zone"></div>
+    <div id="joy"><div id="joy-knob"></div></div>
+    <button id="btn-fire" aria-label="إطلاق"><span></span></button>
+    <button id="btn-reload" aria-label="تلقيم">⟳</button>
+    <button id="btn-switch" aria-label="تبديل السلاح">⇄</button>
+    <button id="btn-jump" aria-label="قفز">↑</button>
+  </div>
+</div>
+
+<!-- ===================== الشاشات ===================== -->
+<div id="screens">
+
+  <!-- الرئيسية -->
+  <section class="screen" data-screen="home">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">DS</span><span class="brand-name">DEAD SECTOR</span></div>
+      <nav class="nav">
+        <button data-action="open" data-id="levels">المراحل</button>
+        <button data-action="open" data-id="shop">الأسلحة</button>
+        <button data-action="open" data-id="upgrades">التطوير</button>
+        <button data-action="open" data-id="rules">القواعد</button>
+        <button data-action="open" data-id="settings">الإعدادات</button>
+      </nav>
+      <div class="wallet" data-wallet></div>
+    </header>
+    <div class="home-wrap">
+      <div class="home-hero">
+        <span class="eyebrow">منظور شخص أول · 3D · هاتف ولابتوب</span>
+        <h1 class="wordmark">DEAD<br /><span>SECTOR</span></h1>
+        <p class="lede">المدينة سقطت في ليلة واحدة. خمسة قطاعات تفصلك عن الفجر — وفي كل قطاع شيء أسوأ من الذي قبله. اجمع العملات، طوّر سلاحك، واشترِ ما يستحق البقاء.</p>
+        <div id="home-continue"></div>
+      </div>
+      <aside class="home-side">
+        <div class="menu-list">
+          <button class="menu-item" data-action="open" data-id="levels"><b>المراحل</b><span>خمسة قطاعات + قطاع لا نهائي</span><em>01</em></button>
+          <button class="menu-item" data-action="open" data-id="shop"><b>ترسانة الأسلحة</b><span>سبعة أسلحة، سلاحان بالبلّورات</span><em>02</em></button>
+          <button class="menu-item" data-action="open" data-id="upgrades"><b>ورشة التطوير</b><span>4 خصائص لكل سلاح + 4 مهارات</span><em>03</em></button>
+          <button class="menu-item" data-action="open" data-id="rules"><b>قواعد القطاع</b><span>الاقتصاد والصعوبة والقتال</span><em>04</em></button>
+        </div>
+        <div class="home-stats" id="home-stats"></div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- المراحل -->
+  <section class="screen" data-screen="levels">
+    <header class="topbar">
+      <button class="back" data-action="close">→ القائمة</button>
+      <div class="brand small"><span class="brand-mark">DS</span><span class="brand-name">المراحل</span></div>
+      <div class="wallet" data-wallet></div>
+    </header>
+    <div class="panel-wrap">
+      <div class="panel-head">
+        <h2>خمس ليالٍ. قطاع واحد.</h2>
+        <p>كل مرحلة تفتح نوعاً جديداً من الزومبي وتزيد الصحة والضرر. لا يمكن تجاوز مرحلة قبل إكمال التي قبلها.</p>
+      </div>
+      <div id="levels-list" class="levels-grid"></div>
+    </div>
+  </section>
+
+  <!-- الأسلحة -->
+  <section class="screen" data-screen="shop">
+    <header class="topbar">
+      <button class="back" data-action="close">→ القائمة</button>
+      <div class="brand small"><span class="brand-mark">DS</span><span class="brand-name">الترسانة</span></div>
+      <div class="wallet" data-wallet></div>
+    </header>
+    <div class="panel-wrap">
+      <div class="panel-head">
+        <h2>ما تحمله يحدد كم تعيش</h2>
+        <p>الأسلحة الخمسة الأولى تُشترى بالعملات ₡. السلاحان الأخيران يُشترىان بالبلّورات ✦ التي تُسقط من الزعماء فقط.</p>
+      </div>
+      <div id="shop-grid" class="shop-grid"></div>
+    </div>
+  </section>
+
+  <!-- التطوير -->
+  <section class="screen" data-screen="upgrades">
+    <header class="topbar">
+      <button class="back" data-action="close">→ القائمة</button>
+      <div class="brand small"><span class="brand-mark">DS</span><span class="brand-name">الورشة</span></div>
+      <div class="wallet" data-wallet></div>
+    </header>
+    <div class="panel-wrap">
+      <div class="panel-head">
+        <h2>كل طلقة تستحق أن تكون أقوى</h2>
+        <p>ثمانية مستويات لكل خاصية. السعر يتضاعف 1.58× مع كل مستوى. الترقيات دائمة ولا تُفقد بالموت.</p>
+      </div>
+      <div id="up-tabs" class="tabs"></div>
+      <div id="up-body"></div>
+    </div>
+  </section>
+
+  <!-- القواعد -->
+  <section class="screen" data-screen="rules">
+    <header class="topbar">
+      <button class="back" data-action="close">→ القائمة</button>
+      <div class="brand small"><span class="brand-mark">DS</span><span class="brand-name">القواعد</span></div>
+      <div class="wallet" data-wallet></div>
+    </header>
+    <div class="panel-wrap">
+      <div class="panel-head">
+        <h2>لا شيء هنا عشوائي</h2>
+        <p>كل رقم في اللعبة له قاعدة مكتوبة. هذه هي.</p>
+      </div>
+      <div id="rules-body"></div>
+    </div>
+  </section>
+
+  <!-- الإعدادات -->
+  <section class="screen" data-screen="settings">
+    <header class="topbar">
+      <button class="back" data-action="close">→ القائمة</button>
+      <div class="brand small"><span class="brand-mark">DS</span><span class="brand-name">الإعدادات</span></div>
+      <div class="wallet" data-wallet></div>
+    </header>
+    <div class="panel-wrap narrow">
+      <div class="panel-head"><h2>اضبطه على مقاسك</h2></div>
+      <div class="settings">
+        <label><span>حساسية النظر</span><input id="opt-sens" type="range" min="0.3" max="2.4" step="0.05" /></label>
+        <label><span>الصوت</span><input id="opt-vol" type="range" min="0" max="1" step="0.05" /></label>
+        <label><span>الجودة</span>
+          <select id="opt-quality">
+            <option value="auto">تلقائي (حسب الجهاز)</option>
+            <option value="high">عالية — ظلال كاملة</option>
+            <option value="medium">متوسطة</option>
+            <option value="low">منخفضة — أسرع على الهاتف</option>
+          </select>
+        </label>
+        <label class="row"><span>عكس محور النظر</span><input id="opt-invert" type="checkbox" /></label>
+        <div class="settings-actions">
+          <button class="btn ghost" data-action="toggleSound" id="opt-sound-state">الصوت مفعّل</button>
+          <button class="btn danger" data-action="reset">محو التقدّم</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- الإيقاف -->
+  <section class="screen" data-screen="pause">
+    <div class="modal">
+      <span class="tag">إيقاف مؤقت</span>
+      <h2>القطاع ينتظرك</h2>
+      <div id="pause-wallet" class="wallet inline"></div>
+      <div class="modal-actions">
+        <button class="btn primary big" data-action="resume">متابعة</button>
+        <button class="btn ghost" data-action="restart">إعادة المرحلة</button>
+        <button class="btn ghost" data-action="open" data-id="upgrades">التطوير</button>
+        <button class="btn ghost" data-action="open" data-id="settings">الإعدادات</button>
+        <button class="btn danger" data-action="menu">الخروج للقائمة</button>
+      </div>
+      <p class="muted small">ملاحظة: فتح ورشة التطوير أثناء الإيقاف لا يستهلك وقت الموجة.</p>
+    </div>
+  </section>
+
+  <!-- النتائج -->
+  <section class="screen" data-screen="result">
+    <div class="modal wide" id="result-panel"></div>
+  </section>
+</div>
+
+<div id="rotate-hint"><span>↻</span><b>أدر الجهاز أفقياً لتجربة أفضل</b></div>
+
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>

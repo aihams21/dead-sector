@@ -1,0 +1,19 @@
+{
+  "name": "dead-sector",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "DEAD SECTOR — لعبة تصويب زومبي ثلاثية الأبعاد بمنظور الشخص الأول تعمل على الهاتف واللابتوب",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --host --port 4173"
+  },
+  "dependencies": {
+    "three": "^0.187.0"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^25.17.0",
+    "vite": "^8.3.8"
+  }
+}

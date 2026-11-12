@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>DEAD SECTOR — القطاع الميت | لعبة تصويب زومبي ثلاثية الأبعاد</title>
+<meta name="description" content="DEAD SECTOR: لعبة تصويب زومبي بمنظور الشخص الأول تعمل على الهاتف واللابتوب. خمسة قطاعات، سبعة أسلحة، وحوش، تطوير، وعملات. العب مجاناً في المتصفح." />
+<meta name="theme-color" content="#06070a" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="canonical" href="https://dead-sector.vercel.app/" />
+
+<meta property="og:type" content="website" />
+<meta property="og:title" content="DEAD SECTOR — القطاع الميت" />
+<meta property="og:description" content="المدينة سقطت. القطاع الأخير بيدك. لعبة تصويب زومبي 3D في المتصفح — هاتف ولابتوب." />
+<meta property="og:image" content="/shots/01-menu.png" />
+<meta name="twitter:card" content="summary_large_image" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/landing/style.css" />
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+<div class="glow glow-a" aria-hidden="true"></div>
+<div class="glow glow-b" aria-hidden="true"></div>
+
+<header class="nav" id="nav">
+  <a class="brand" href="#top" aria-label="DEAD SECTOR">
+    <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+    <span class="brand-txt">DEAD<b>SECTOR</b></span>
+  </a>
+  <nav class="nav-links" aria-label="أقسام الصفحة">
+    <a href="#campaign">القطاعات</a>
+    <a href="#arsenal">الترسانة</a>
+    <a href="#economy">الاقتصاد</a>
+    <a href="#control">التحكّم</a>
+    <a href="#gallery">اللقطات</a>
+    <a href="#rules">القواعد</a>
+  </nav>
+  <a class="btn-play" href="/play/" data-cta="nav">
+    <span>العب الآن</span>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+  </a>
+</header>
+
+<main id="top">
+
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <p class="kicker"><span class="dot"></span> تصويب زومبي · منظور أول · 3D · في المتصفح</p>
+        <h1 class="hero-title">
+          <span class="latin">DEAD</span>
+          <span class="latin acid">SECTOR</span>
+        </h1>
+        <p class="hero-sub">المدينة سقطت. القطاع الأخير بيدك.</p>
+        <p class="hero-lede">
+          خمسة قطاعات متتالية، سبعة أسلحة، وأربعة أنواع من المصابين — كل ليلة أصعب من التي قبلها.
+          اجمع العملات، طوّر سلاحك، واصمد حتى آخر موجة. لا تحميل، لا حساب، تفتح وتلعب.
+        </p>
+        <div class="hero-actions">
+          <a class="btn-play big" href="/play/" data-cta="hero">
+            <span>ابدأ المهمة</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+          </a>
+          <a class="btn-ghost" href="#campaign">شوف القطاعات ↓</a>
+        </div>
+        <ul class="hero-badges">
+          <li>بدون تنزيل</li>
+          <li>يعمل على الهاتف</li>
+          <li>حفظ تلقائي</li>
+          <li>مجاني بالكامل</li>
+        </ul>
+      </div>
+
+      <div class="hero-visual">
+        <figure class="shot frame main">
+          <img src="/shots/01-menu.png" alt="شاشة البداية في DEAD SECTOR" width="1600" height="900" fetchpriority="high" />
+          <figcaption><span>01</span> شاشة البداية — مشهد حقيقي من اللعبة</figcaption>
+        </figure>
+        <figure class="shot frame small s1">
+          <img src="/shots/06-combat.png" alt="قتال الزومبي في اللعبة" width="1600" height="900" loading="lazy" />
+        </figure>
+        <figure class="shot frame small s2">
+          <img src="/shots/03-shop.png" alt="متجر الأسلحة" width="1600" height="900" loading="lazy" />
+        </figure>
+        <div class="hero-tag">لقطات من اللعبة الفعلية · لا رسوم ترويجية</div>
+      </div>
+    </div>
+
+    <div class="stats" id="hero-stats" aria-label="أرقام اللعبة"></div>
+  </section>
+
+  <!-- ============ RIBBON ============ -->
+  <div class="ribbon" aria-hidden="true">
+    <div class="ribbon-track" id="ribbon"></div>
+  </div>
+
+  <!-- ============ WHY ============ -->
+  <section class="section" id="why">
+    <div class="sec-head">
+      <span class="sec-num">01</span>
+      <div>
+        <h2>لماذا <span class="acid">DEAD SECTOR</span>؟</h2>
+        <p>ليست تجربة تجريبية قصيرة. خمس قطاعات كاملة، موازنة مكتوبة بالأرقام، ومحتوى يعيد اللعب.</p>
+      </div>
+    </div>
+
+    <div class="cards" id="why-cards"></div>
+  </section>
+
+  <!-- ============ CAMPAIGN ============ -->
+  <section class="section" id="campaign">
+    <div class="sec-head">
+      <span class="sec-num">02</span>
+      <div>
+        <h2>خمسة قطاعات، <span class="acid">تصعيد</span> حقيقي</h2>
+        <p>كل قطاع له لوحته وضوءه وأجواؤه. الموجات تزيد عدداً وسرعةً، والزعماء لا يظهرون قبل القطاع الثالث.</p>
+      </div>
+    </div>
+
+    <div class="levels" id="levels"></div>
+  </section>
+
+  <!-- ============ ARSENAL ============ -->
+  <section class="section" id="arsenal">
+    <div class="sec-head">
+      <span class="sec-num">03</span>
+      <div>
+        <h2>سبعة أسلحة، <span class="acid">سلاحان</span> بالبلّورات</h2>
+        <p>تبدأ بمسدس الخدمة مجاناً. كل سلاح جديد يفتح أسلوب لعب مختلف — والأقوى لا يُشترى بالعملات العادية.</p>
+      </div>
+    </div>
+
+    <div class="arsenal-wrap">
+      <div class="weapons" id="weapons"></div>
+      <div class="arsenal-note">
+        <strong>قاعدة البلّورات:</strong> البلّورات ✦ لا تُشترى بمال حقيقي ولا تُباع. مصدرها الوحيد:
+        الزعماء، صناديق نادرة داخل الموجات، ومكافآت إتمام القطاعات. سلاحا <em>ARC-9</em> و<em>HF-8</em>
+        يتطلبان بلّورات + عملات معاً — لا تُنجز بالأموال وحدها.
+      </div>
+    </div>
+
+    <div class="table-scroll">
+      <table class="data-table" id="weapon-table">
+        <caption>جدول المواصفات الكامل — الأرقام من ملف موازنة اللعبة نفسه</caption>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ UPGRADE ============ -->
+  <section class="section" id="upgrade">
+    <div class="sec-head">
+      <span class="sec-num">04</span>
+      <div>
+        <h2>تطوير بأرقام <span class="acid">مكشوفة</span></h2>
+        <p>لكل سلاح أربع خصائص، ثمانية مستويات لكل واحدة. التكلفة تصعد بنسبة ثابتة، والمردود مكتوب — لا صناديق غامضة.</p>
+      </div>
+    </div>
+
+    <div class="up-grid">
+      <div class="up-panel">
+        <h3 class="mini-head">خصائص السلاح</h3>
+        <div class="stats-list" id="stat-list"></div>
+      </div>
+      <div class="up-panel">
+        <h3 class="mini-head">مهارات الناجي</h3>
+        <div class="perks" id="perks"></div>
+      </div>
+    </div>
+
+    <div class="cost-curve">
+      <div class="curve-copy">
+        <h3>منحنى التكلفة</h3>
+        <p>تكلفة ترقية واحدة على مسدس الخدمة (المستوى الأول أرخص): كل مستوى يضرب في <b>1.58</b>.</p>
+      </div>
+      <ol class="bars" id="cost-bars"></ol>
+    </div>
+  </section>
+
+  <!-- ============ ENEMIES ============ -->
+  <section class="section" id="enemies">
+    <div class="sec-head">
+      <span class="sec-num">05</span>
+      <div>
+        <h2>أربعة أنواع، <span class="acid">أربع</span> طرق للموت</h2>
+        <p>كل نوع يتحرك ويضرب بشكل مختلف. الضخم لا يسقط برصاصة، والزعيم يحتاج خطة.</p>
+      </div>
+    </div>
+    <div class="enemies" id="enemies-grid"></div>
+  </section>
+
+  <!-- ============ ECONOMY ============ -->
+  <section class="section" id="economy">
+    <div class="sec-head">
+      <span class="sec-num">06</span>
+      <div>
+        <h2>اقتصاد <span class="acid">واضح</span> بلا مفاجآت</h2>
+        <p>كل عملة تدخل جيبك لها مصدر معروف، وكل صرف له سعر معلن. هاي الجداول هي نفسها التي تعمل داخل اللعبة.</p>
+      </div>
+    </div>
+
+    <div class="econ-grid">
+      <div class="econ-card">
+        <h3><span class="cur coin">₡</span> مصادر العملات</h3>
+        <ul class="econ-list" id="coin-sources"></ul>
+      </div>
+      <div class="econ-card">
+        <h3><span class="cur gem">✦</span> مصادر البلّورات</h3>
+        <ul class="econ-list" id="gem-sources"></ul>
+      </div>
+      <div class="econ-card">
+        <h3><span class="cur luck">%</span> احتمالات السقوط</h3>
+        <ul class="econ-list" id="drops"></ul>
+      </div>
+    </div>
+
+    <div class="callout">
+      <b>قاعدة صريحة:</b> لا تُشترى العملات بمال حقيقي، ولا يوجد متجر مدفوع، ولا إعلانات.
+      تقدّمك محفوظ في متصفحك على جهازك، ويبدأ من جديد فقط إذا حذفت بيانات الموقع.
+    </div>
+  </section>
+
+  <!-- ============ CONTROL ============ -->
+  <section class="section" id="control">
+    <div class="sec-head">
+      <span class="sec-num">07</span>
+      <div>
+        <h2>لابتوب أو هاتف — <span class="acid">بنفس</span> الجودة</h2>
+        <p>تحكّم كامل بالفأرة والكيبورد، وتحكّم لمسي مصمّم لليدين على شاشة صغيرة. نفس اللعبة، نفس المستوى.</p>
+      </div>
+    </div>
+
+    <div class="control-grid">
+      <div class="control-card">
+        <header><span class="ico">⌨</span><h3>لابتوب / مكتبي</h3></header>
+        <ul id="controls-desktop"></ul>
+      </div>
+      <div class="control-card">
+        <header><span class="ico">☍</span><h3>هاتف / تابلت</h3></header>
+        <ul id="controls-touch"></ul>
+      </div>
+      <figure class="shot frame tall">
+        <img src="/shots/08-mobile.png" alt="واجهة اللعب على الهاتف" width="430" height="900" loading="lazy" />
+        <figcaption><span>08</span> واجهة اللمس على الهاتف</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ============ GALLERY ============ -->
+  <section class="section" id="gallery">
+    <div class="sec-head">
+      <span class="sec-num">08</span>
+      <div>
+        <h2>من <span class="acid">داخل</span> اللعبة</h2>
+        <p>لقطات مأخوذة من النسخة التي ستلعبها الآن — بلا تعديل ولا رسم ترويجي.</p>
+      </div>
+    </div>
+
+    <div class="gallery" id="gallery-grid"></div>
+  </section>
+
+  <!-- ============ RULES ============ -->
+  <section class="section" id="rules">
+    <div class="sec-head">
+      <span class="sec-num">09</span>
+      <div>
+        <h2>قواعد <span class="acid">القطاع</span></h2>
+        <p>مكتوبة كما هي مطبّقة في الكود. تُفتح كل نقطة للتفاصيل.</p>
+      </div>
+    </div>
+    <div class="rules" id="rules-list"></div>
+  </section>
+
+  <!-- ============ FAQ ============ -->
+  <section class="section" id="faq">
+    <div class="sec-head">
+      <span class="sec-num">10</span>
+      <div>
+        <h2>أسئلة <span class="acid">متكررة</span></h2>
+      </div>
+    </div>
+    <div class="rules faq" id="faq-list"></div>
+  </section>
+
+  <!-- ============ CTA ============ -->
+  <section class="final" id="play">
+    <div class="final-inner">
+      <p class="kicker"><span class="dot"></span> ما بقي شيء تحمّله</p>
+      <h2>القطاع مفتوح.<br /><span class="acid">ادخل.</span></h2>
+      <p>خمس قطاعات تنتظرك، وسبعة أسلحة، وزعيم لا يعرف الرحمة. كل شيء يعمل في المتصفح — على أي جهاز.</p>
+      <a class="btn-play huge" href="/play/" data-cta="final">
+        <span>العب DEAD SECTOR</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+      </a>
+      <p class="final-note">لا تسجيل · لا تنزيل · يعمل بلا اتصال بعد أول تحميل</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <div class="foot-main">
+    <div class="foot-brand">
+      <span class="brand-txt">DEAD<b>SECTOR</b></span>
+      <p>لعبة تصويب زومبي ثلاثية الأبعاد بمنظور الشخص الأول، مبنية بـ three.js — أداء محسّن للهاتف واللابتوب.</p>
+    </div>
+    <nav aria-label="روابط">
+      <h4>اللعبة</h4>
+      <a href="/play/">العب الآن</a>
+      <a href="#campaign">القطاعات</a>
+      <a href="#arsenal">الأسلحة</a>
+      <a href="#rules">القواعد</a>
+    </nav>
+    <nav aria-label="معلومات">
+      <h4>معلومات</h4>
+      <a href="#economy">الاقتصاد</a>
+      <a href="#control">التحكّم</a>
+      <a href="#faq">الأسئلة</a>
+      <a href="#gallery">اللقطات</a>
+    </nav>
+    <div class="foot-meta">
+      <h4>الحالة</h4>
+      <p><span class="live"></span> النسخة <b id="version">1.0.0</b> — جاهزة</p>
+      <p>لا حسابات، لا تتبّع، لا إعلانات.</p>
+    </div>
+  </div>
+  <div class="foot-bottom">
+    <span>© <span id="year"></span> DEAD SECTOR</span>
+    <span>صُمّمت وبُنيت بالكامل من الصفر · كل الأصول مولّدة برمجياً</span>
+  </div>
+</footer>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="عرض اللقطة" hidden>
+  <button class="lb-close" aria-label="إغلاق">✕</button>
+  <img alt="" />
+</div>
+
+<script type="module" src="/landing/main.js"></script>
+</body>
+</html>
