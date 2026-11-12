@@ -11,13 +11,14 @@ export class Zombie {
     const def = ZOMBIE_TYPES[typeId];
     this.type = typeId;
     this.def = def;
-    this.level = level;
+    const lv = Number.isFinite(level) && level > 0 ? level : 1;
+    this.level = lv;
     this.scale = def.scale;
-    this.maxHp = Math.round((def.hp + def.growth * (level - 1)) * (typeId === "boss" ? 1 : 1));
+    this.maxHp = Math.round((def.hp + def.growth * (lv - 1)) * (typeId === "boss" ? 1 : 1));
     this.hp = this.maxHp;
-    this.speed = def.speed * (1 + 0.035 * (level - 1)) * (0.9 + Math.random() * 0.2);
+    this.speed = def.speed * (1 + 0.035 * (lv - 1)) * (0.9 + Math.random() * 0.2);
     this.radius = 0.42 * def.scale;
-    this.damage = Math.round(def.dmg * (1 + 0.09 * (level - 1)));
+    this.damage = Math.round(def.dmg * (1 + 0.09 * (lv - 1)));
     this.alive = true;
     this.dying = 0;
     this.attackCd = 0;

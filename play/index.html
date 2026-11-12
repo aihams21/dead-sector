@@ -73,11 +73,16 @@
   <!-- أزرار اللمس -->
   <div id="touch-ui">
     <div id="look-zone"></div>
-    <div id="joy"><div id="joy-knob"></div></div>
-    <button id="btn-fire" aria-label="إطلاق"><span></span></button>
-    <button id="btn-reload" aria-label="تلقيم">⟳</button>
-    <button id="btn-switch" aria-label="تبديل السلاح">⇄</button>
-    <button id="btn-jump" aria-label="قفز">↑</button>
+    <div id="joy" aria-hidden="true"><div id="joy-knob"></div></div>
+    <div class="touch-pad">
+      <div class="touch-col">
+        <button id="btn-switch" aria-label="تبديل السلاح">⇄</button>
+        <button id="btn-reload" aria-label="تلقيم">⟳</button>
+        <button id="btn-jump" aria-label="قفز">↑</button>
+      </div>
+      <button id="btn-fire" aria-label="إطلاق"><span></span></button>
+    </div>
+    <button id="btn-pause" aria-label="إيقاف مؤقت">❚❚</button>
   </div>
 </div>
 
@@ -95,7 +100,10 @@
         <button data-action="open" data-id="rules">القواعد</button>
         <button data-action="open" data-id="settings">الإعدادات</button>
       </nav>
-      <div class="wallet" data-wallet></div>
+      <div class="topbar-end">
+        <button class="btn ghost small fs-btn" data-action="fullscreen" aria-label="ملء الشاشة">⛶ ملء الشاشة</button>
+        <div class="wallet" data-wallet></div>
+      </div>
     </header>
     <div class="home-wrap">
       <div class="home-hero">
@@ -204,6 +212,7 @@
         <label class="row"><span>عكس محور النظر</span><input id="opt-invert" type="checkbox" /></label>
         <div class="settings-actions">
           <button class="btn ghost" data-action="toggleSound" id="opt-sound-state">الصوت مفعّل</button>
+          <button class="btn ghost" data-action="fullscreen">⛶ ملء الشاشة</button>
           <button class="btn danger" data-action="reset">محو التقدّم</button>
         </div>
       </div>
@@ -221,6 +230,7 @@
         <button class="btn ghost" data-action="restart">إعادة المرحلة</button>
         <button class="btn ghost" data-action="open" data-id="upgrades">التطوير</button>
         <button class="btn ghost" data-action="open" data-id="settings">الإعدادات</button>
+        <button class="btn ghost" data-action="fullscreen">⛶ ملء الشاشة</button>
         <button class="btn danger" data-action="menu">الخروج للقائمة</button>
       </div>
       <p class="muted small">ملاحظة: فتح ورشة التطوير أثناء الإيقاف لا يستهلك وقت الموجة.</p>
@@ -233,7 +243,16 @@
   </section>
 </div>
 
-<div id="rotate-hint"><span>↻</span><b>أدر الجهاز أفقياً لتجربة أفضل</b></div>
+<!-- بوابة الاتجاه: اللعب على الهاتف بالعرض فقط -->
+<div id="gate">
+  <div class="gate-box">
+    <span class="gate-ico">↻</span>
+    <h2>لفّ الجهاز بالعرض</h2>
+    <p>DEAD SECTOR مصمّمة للعب بالوضع الأفقي وملء الشاشة. لفّ هاتفك، أو اضغط الزر تحت.</p>
+    <button class="btn primary big" data-action="fullscreen">ملء الشاشة + الوضع الأفقي</button>
+    <small id="gate-note"></small>
+  </div>
+</div>
 
 <script type="module" src="./src/main.js"></script>
 </body>

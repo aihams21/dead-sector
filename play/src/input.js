@@ -70,6 +70,30 @@ export class Input {
     const fireBtn = document.getElementById("btn-fire");
     if (!joy) return;
 
+    /* زر ضغط مستمر — Pointer Events (بتشتغل على كل المتصفحات الحديثة)
+       وبتشتغل مع اللمس والفأرة والقلم بنفس الكود */
+    const hold = (el, onDown, onUp) => {
+      if (!el) return;
+      let id = null;
+      el.addEventListener("pointerdown", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        id = e.pointerId;
+        el.classList.add("pressed");
+        try { el.setPointerCapture(id); } catch { /* ignore */ }
+        onDown?.(e);
+      }, { passive: false });
+      const release = (e) => {
+        if (id !== null && e.pointerId !== id) return;
+        id = null;
+        el.classList.remove("pressed");
+        onUp?.(e);
+      };
+      el.addEventListener("pointerup", release);
+      el.addEventListener("pointercancel", release);
+      el.addEventListener("lostpointercapture", release);
+    };
+
     const setJoy = (dx, dy) => {
       const max = 52;
       const d = Math.hypot(dx, dy);
@@ -84,54 +108,57 @@ export class Input {
       this.move.x = 0; this.move.y = 0;
     };
 
-    joy.addEventListener("touchstart", (e) => {
+    let joyId = null;
+    let joyOrigin = { x: 0, y: 0 };
+    joy.addEventListener("pointerdown", (e) => {
       e.preventDefault();
-      const t = e.changedTouches[0];
-      this._joyId = t.identifier;
+      e.stopPropagation();
+      joyId = e.pointerId;
+      try { joy.setPointerCapture(joyId); } catch { /* ignore */ }
       const r = joy.getBoundingClientRect();
-      this._joyOrigin = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
-      setJoy(t.clientX - this._joyOrigin.x, t.clientY - this._joyOrigin.y);
+      joyOrigin = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+      setJoy(e.clientX - joyOrigin.x, e.clientY - joyOrigin.y);
     }, { passive: false });
-    joy.addEventListener("touchmove", (e) => {
+    joy.addEventListener("pointermove", (e) => {
+      if (e.pointerId !== joyId) return;
       e.preventDefault();
-      for (const t of e.changedTouches) {
-        if (t.identifier !== this._joyId) continue;
-        setJoy(t.clientX - this._joyOrigin.x, t.clientY - this._joyOrigin.y);
-      }
+      setJoy(e.clientX - joyOrigin.x, e.clientY - joyOrigin.y);
     }, { passive: false });
     const endJoy = (e) => {
-      for (const t of e.changedTouches) if (t.identifier === this._joyId) { this._joyId = null; resetJoy(); }
+      if (e.pointerId !== joyId) return;
+      joyId = null;
+      resetJoy();
     };
-    joy.addEventListener("touchend", endJoy);
-    joy.addEventListener("touchcancel", endJoy);
+    joy.addEventListener("pointerup", endJoy);
+    joy.addEventListener("pointercancel", endJoy);
 
     if (lookZone) {
-      lookZone.addEventListener("touchstart", (e) => {
-        const t = e.changedTouches[0];
-        this._lookId = t.identifier;
-        this._lookPos = { x: t.clientX, y: t.clientY };
-      }, { passive: true });
-      lookZone.addEventListener("touchmove", (e) => {
-        for (const t of e.changedTouches) {
-          if (t.identifier !== this._lookId) continue;
-          this.look.dx += (t.clientX - this._lookPos.x) * 0.0042 * this.sensitivity;
-          this.look.dy += (t.clientY - this._lookPos.y) * 0.0042 * this.sensitivity * (this.invert ? -1 : 1);
-          this._lookPos = { x: t.clientX, y: t.clientY };
-        }
-      }, { passive: true });
+      let lookId = null;
+      let lookPos = { x: 0, y: 0 };
+      lookZone.addEventListener("pointerdown", (e) => {
+        if (joyId !== null) return; /* العصا عندها الأولوية */
+        lookId = e.pointerId;
+        lookPos = { x: e.clientX, y: e.clientY };
+        try { lookZone.setPointerCapture(lookId); } catch { /* ignore */ }
+      });
+      lookZone.addEventListener("pointermove", (e) => {
+        if (e.pointerId !== lookId) return;
+        this.look.dx += (e.clientX - lookPos.x) * 0.0042 * this.sensitivity;
+        this.look.dy += (e.clientY - lookPos.y) * 0.0042 * this.sensitivity * (this.invert ? -1 : 1);
+        lookPos = { x: e.clientX, y: e.clientY };
+      });
       const endLook = (e) => {
-        for (const t of e.changedTouches) if (t.identifier === this._lookId) this._lookId = null;
+        if (e.pointerId === lookId) lookId = null;
       };
-      lookZone.addEventListener("touchend", endLook);
-      lookZone.addEventListener("touchcancel", endLook);
+      lookZone.addEventListener("pointerup", endLook);
+      lookZone.addEventListener("pointercancel", endLook);
     }
 
-    fireBtn?.addEventListener("touchstart", (e) => { e.preventDefault(); this.fire = true; }, { passive: false });
-    fireBtn?.addEventListener("touchend", (e) => { e.preventDefault(); this.fire = false; }, { passive: false });
-    fireBtn?.addEventListener("touchcancel", () => { this.fire = false; });
-    document.getElementById("btn-reload")?.addEventListener("touchstart", (e) => { e.preventDefault(); this.reloadQueued = true; }, { passive: false });
-    document.getElementById("btn-jump")?.addEventListener("touchstart", (e) => { e.preventDefault(); this.jumpQueued = true; }, { passive: false });
-    document.getElementById("btn-switch")?.addEventListener("touchstart", (e) => { e.preventDefault(); this.switchQueued = 1; }, { passive: false });
+    hold(fireBtn, () => { this.fire = true; }, () => { this.fire = false; });
+    hold(document.getElementById("btn-reload"), () => { this.reloadQueued = true; });
+    hold(document.getElementById("btn-jump"), () => { this.jumpQueued = true; });
+    hold(document.getElementById("btn-switch"), () => { this.switchQueued = 1; });
+    hold(document.getElementById("btn-pause"), () => { this.pausedRequested = true; });
   }
 
   consumeLook() {

@@ -132,7 +132,7 @@ if (mode === "capture") {
 
   // موبايل
   const mobile = await browser.newPage();
-  await mobile.setViewport({ width: 430, height: 900, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+  await mobile.setViewport({ width: 844, height: 390, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
   await mobile.goto(`${BASE}/play/`, { waitUntil: "networkidle2", timeout: 60000 });
   await mobile.waitForFunction("window.__DS && window.__DS.game", { timeout: 30000 });
   await sleep(1000);

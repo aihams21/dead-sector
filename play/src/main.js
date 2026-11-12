@@ -1,6 +1,15 @@
 /* نقطة الإقلاع: تشغيل اللعبة، إخفاء شاشة التحضير، ودعم معاملات الرابط */
 import { Game } from "./game.js";
 import { unlockAudio, setVolume } from "./audio.js";
+import {
+  isFullscreen,
+  enterFullscreen,
+  exitFullscreen,
+  lockLandscape,
+  unlockOrientation,
+  isTouchDevice,
+  onFullscreenChange,
+} from "./fullscreen.js";
 
 const canvas = document.getElementById("game");
 const boot = document.getElementById("boot");
@@ -57,9 +66,112 @@ if (game) {
   }
 }
 
-/* إشارة للـCSS: هل الجهاز يعتمد اللمس؟ */
-const coarse = window.matchMedia("(pointer: coarse)").matches;
-document.body.classList.toggle("is-touch", coarse);
+/* =============== ملء الشاشة + اتجاه الجهاز =============== */
+const touch = isTouchDevice();
+document.body.classList.toggle("is-touch", touch);
+
+const portraitMQ = window.matchMedia("(orientation: portrait)");
+const gate = document.getElementById("gate");
+const gateNote = document.getElementById("gate-note");
+let gatePaused = false;
+
+/* بوابة «لفّ الجهاز»: تظهر فقط على الهاتف بالطول وأثناء اللعب */
+function gateActive() {
+  return (
+    document.body.classList.contains("is-touch") &&
+    document.body.classList.contains("portrait") &&
+    document.body.classList.contains("playing")
+  );
+}
+
+function syncGate() {
+  if (!game) return;
+  if (gateActive() && game.state === "playing") {
+    gatePaused = true;
+    game.pause();
+    game.ui.hide(); /* نخفي شاشة الإيقاف ورا البوابة */
+  } else if (!gateActive() && gatePaused) {
+    gatePaused = false;
+    if (game.state === "paused") game.resume();
+  }
+}
+
+function applyOrientation() {
+  const portrait = portraitMQ.matches;
+  document.body.classList.toggle("portrait", portrait);
+  document.body.classList.toggle("landscape", !portrait);
+  syncGate();
+}
+portraitMQ.addEventListener?.("change", applyOrientation);
+try {
+  screen.orientation?.addEventListener?.("change", () => setTimeout(applyOrientation, 60));
+} catch {
+  /* غير مدعوم */
+}
+applyOrientation();
+
+/* نصوص أزرار ملء الشاشة */
+function refreshFsButtons() {
+  const full = isFullscreen();
+  document.querySelectorAll('[data-action="fullscreen"]').forEach((b) => {
+    if (b.closest("#gate")) return;
+    b.textContent = full ? "⛶ خروج من ملء الشاشة" : "⛶ ملء الشاشة";
+    b.setAttribute("aria-pressed", full ? "true" : "false");
+  });
+}
+onFullscreenChange(() => {
+  refreshFsButtons();
+  if (!isFullscreen()) unlockOrientation();
+  setTimeout(applyOrientation, 80);
+});
+refreshFsButtons();
+
+/* زر ملء الشاشة: لازم ينطلب من داخل النقرة نفسها */
+async function handleFullscreen() {
+  if (isFullscreen()) {
+    await exitFullscreen();
+  } else {
+    const ok = await enterFullscreen();
+    if (ok && touch) await lockLandscape();
+    if (!ok && gateNote) {
+      gateNote.textContent = "المتصفح ما سمح بملء الشاشة — لفّ الجهاز يدوياً.";
+    }
+  }
+  refreshFsButtons();
+  setTimeout(applyOrientation, 80);
+  if (gateActive() && isFullscreen()) syncGate();
+}
+
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest('[data-action="fullscreen"]');
+  if (!btn) return;
+  e.preventDefault();
+  e.stopPropagation();
+  void handleFullscreen();
+});
+
+/* أول بدء مرحلة على الهاتف: نحاول ندخل ملء الشاشة داخل نفس الإيماءة */
+document.addEventListener(
+  "click",
+  (e) => {
+    if (!touch || !e.target.closest('[data-action="play"], [data-action="endless"]')) return;
+    if (isFullscreen()) return;
+    void (async () => {
+      if (await enterFullscreen()) await lockLandscape();
+      refreshFsButtons();
+    })();
+  },
+  true
+);
+
+/* لو الجهاز انقلب/تغيّرت الشاشة أثناء اللعب */
+if (gate) gate.addEventListener("pointerdown", (e) => e.stopPropagation());
+
+/* تابع تغيّر كلاسات body (playing تتبدّل من game.js) */
+new MutationObserver(syncGate).observe(document.body, {
+  attributes: true,
+  attributeFilter: ["class"],
+});
 
 /* منع تكبير الصفحة بإيماءة اللمس المزدوجة داخل اللعبة فقط */
 document.addEventListener(

@@ -154,6 +154,7 @@ async function bootDesktop() {
   await page.setViewport({ width: 1600, height: 900 });
   await page.goto(`${BASE}/play/`, { waitUntil: "networkidle2", timeout: 60000 });
   await page.waitForFunction("window.__DS && window.__DS.game", { timeout: 30000 });
+  await page.evaluate(() => document.body.classList.add("qa"));
   await sleep(900);
   return { page, errors };
 }
@@ -213,6 +214,7 @@ for (const [w, h, label] of [[430, 900, "iphone15"], [390, 844, "iphone14"], [36
   await page.setViewport({ width: w, height: h, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
   await page.goto(`${BASE}/play/`, { waitUntil: "networkidle2", timeout: 60000 });
   await page.waitForFunction("window.__DS && window.__DS.game", { timeout: 30000 });
+  await page.evaluate(() => document.body.classList.add("qa"));
   await sleep(900);
   await audit(page, `${label}/home`, 44);
   for (const s of ["levels", "shop", "upgrades", "rules", "settings"]) {
@@ -250,16 +252,46 @@ for (const [w, h, label] of [[430, 900, "iphone15"], [390, 844, "iphone14"], [36
   await page.setViewport({ width: 844, height: 390, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
   await page.goto(`${BASE}/play/`, { waitUntil: "networkidle2", timeout: 60000 });
   await page.waitForFunction("window.__DS && window.__DS.game", { timeout: 30000 });
+  await page.evaluate(() => document.body.classList.add("qa"));
   await sleep(800);
   await audit(page, "landscape/home", 44);
   await page.evaluate(() => window.__DS.start(1));
   await sleep(1500);
   await audit(page, "landscape/play", 44);
-  const rot = await page.evaluate(() => {
-    const el = document.getElementById("rotate-hint");
-    return el ? { display: getComputedStyle(el).display, op: getComputedStyle(el).opacity, text: el.textContent.trim().slice(0, 60) } : "MISSING";
+  const gateState = await page.evaluate(() => {
+    const el = document.getElementById("gate");
+    return el ? { display: getComputedStyle(el).display } : "MISSING";
   });
-  console.log("rotate:", JSON.stringify(rot));
+  console.log("gate(landscape):", JSON.stringify(gateState));
+  await page.close();
+}
+
+/* ---------- بوابة الاتجاه (هاتف بالطول) ---------- */
+{
+  const page = await browser.newPage();
+  await page.setViewport({ width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+  await page.goto(`${BASE}/play/`, { waitUntil: "networkidle2", timeout: 60000 });
+  await page.waitForFunction("window.__DS && window.__DS.game", { timeout: 30000 });
+  await sleep(900);
+  await page.evaluate(() => window.__DS.start(1));
+  await sleep(700);
+  const g1 = await page.evaluate(() => {
+    const el = document.getElementById("gate");
+    return { display: getComputedStyle(el).display, state: window.__DS.game.state, playing: document.body.classList.contains("playing") };
+  });
+  console.log("gate(portrait/playing):", JSON.stringify(g1));
+  if (g1.display !== "grid") { warn("بوابة الاتجاه ما ظهرت بالطول"); }
+  if (g1.state !== "paused") { warn("اللعبة ما توقفت وقت البوابة"); }
+  /* لفّ الجهاز للعرض → البوابة تختفي واللعبة ترجع */
+  await page.setViewport({ width: 844, height: 390, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+  await sleep(900);
+  const g2 = await page.evaluate(() => {
+    const el = document.getElementById("gate");
+    return { display: getComputedStyle(el).display, state: window.__DS.game.state };
+  });
+  console.log("gate(landscape/resumed):", JSON.stringify(g2));
+  if (g2.display !== "none") { warn("البوابة ما اختفت بعد لفّ الجهاز"); }
+  if (g2.state !== "playing") { warn("اللعبة ما رجعت بعد لفّ الجهاز"); }
   await page.close();
 }
 

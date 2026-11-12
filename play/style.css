@@ -217,6 +217,8 @@ body.playing #game { cursor: none; }
   transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
 }
 #boss-bar.on { opacity: 1; transform: translate(-50%, 0); }
+/* شريط الزعيم ياخد مكان التلميح — لا تراكب */
+#boss-bar.on ~ #hud-hint { opacity: 0; }
 #boss-name {
   display: block;
   font-size: 12px;
@@ -471,7 +473,16 @@ body.playing #game { cursor: none; }
 
 /* ============ أزرار اللمس ============ */
 #touch-ui { display: none; }
-body.is-touch.playing #touch-ui { display: block; }
+body.is-touch.playing #touch-ui {
+  display: block;
+  position: fixed;
+  inset: 0;
+  pointer-events: none; /* الحاوية شفافة — الأزرار وحدها تستقبل اللمس */
+}
+
+/* #hud عنده pointer-events:none — لازم كل عنصر لمس يعيد تفعيلها،
+   وإلا الأزرار بتستقبل صفر أحداث (هذا كان سبب تعطّل الأزرار على الهاتف) */
+#look-zone, #joy, .touch-pad, #touch-ui #btn-pause { pointer-events: auto; }
 
 #look-zone {
   position: fixed;
@@ -483,10 +494,10 @@ body.is-touch.playing #touch-ui { display: block; }
 #joy {
   position: fixed;
   z-index: 3;
-  left: calc(22px + env(safe-area-inset-left));
-  bottom: calc(22px + env(safe-area-inset-bottom));
-  width: 132px;
-  height: 132px;
+  left: calc(20px + env(safe-area-inset-left));
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  width: 128px;
+  height: 128px;
   border-radius: 50%;
   border: 1.5px solid rgba(255, 255, 255, 0.16);
   background: radial-gradient(circle, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
@@ -495,35 +506,52 @@ body.is-touch.playing #touch-ui { display: block; }
   place-items: center;
 }
 #joy-knob {
-  width: 56px;
-  height: 56px;
+  width: 54px;
+  height: 54px;
   border-radius: 50%;
   background: rgba(232, 237, 244, 0.32);
   border: 1.5px solid rgba(255, 255, 255, 0.5);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
   will-change: transform;
+  pointer-events: none;
 }
 
 #touch-ui button {
-  position: fixed;
+  position: relative; /* داخل صف مرن: بلا تراكب ولا إحداثيات ثابتة */
   z-index: 4;
   display: grid;
   place-items: center;
+  width: 56px;
+  height: 56px;
+  padding: 0;
   border-radius: 50%;
   border: 1.5px solid rgba(255, 255, 255, 0.18);
   background: rgba(14, 18, 24, 0.55);
   backdrop-filter: blur(4px);
   color: #e8edf4;
   touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
   transition: transform 0.1s ease, background 0.15s;
 }
-#touch-ui button:active { transform: scale(0.94); background: rgba(200, 255, 58, 0.2); }
+#touch-ui button:active,
+#touch-ui button.pressed { transform: scale(0.94); background: rgba(200, 255, 58, 0.2); }
 
-#btn-fire {
-  right: calc(26px + env(safe-area-inset-right));
-  bottom: calc(26px + env(safe-area-inset-bottom));
-  width: 106px;
-  height: 106px;
+/* مجموعة أزرار اليمين: عمود صغير + زر النار */
+.touch-pad {
+  position: fixed;
+  z-index: 4;
+  right: calc(20px + env(safe-area-inset-right));
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+.touch-col { display: flex; flex-direction: column; gap: 10px; }
+
+#touch-ui #btn-fire {
+  width: 100px;
+  height: 100px;
   border-color: rgba(255, 47, 67, 0.5);
   background: rgba(80, 10, 18, 0.42);
 }
@@ -534,48 +562,80 @@ body.is-touch.playing #touch-ui { display: block; }
   border: 2px solid rgba(255, 90, 105, 0.85);
   background: rgba(255, 47, 67, 0.22);
   box-shadow: 0 0 20px rgba(255, 47, 67, 0.35);
-}
-
-#btn-reload {
-  right: calc(148px + env(safe-area-inset-right));
-  bottom: calc(30px + env(safe-area-inset-bottom));
-  width: 56px; height: 56px;
-  font-size: 21px;
-  line-height: 1;
-}
-#btn-switch {
-  right: calc(148px + env(safe-area-inset-right));
-  bottom: calc(98px + env(safe-area-inset-bottom));
-  width: 56px; height: 56px;
-  font-size: 20px;
-}
-#btn-jump {
-  right: calc(30px + env(safe-area-inset-right));
-  bottom: calc(146px + env(safe-area-inset-bottom));
-  width: 56px; height: 56px;
-  font-size: 20px;
-}
-
-/* تلميح تدوير الشاشة */
-#rotate-hint {
-  position: fixed;
-  z-index: 30;
-  left: 50%;
-  bottom: calc(8px + env(safe-area-inset-bottom));
-  transform: translateX(-50%);
-  display: none;
-  align-items: center;
-  gap: 7px;
-  padding: 6px 13px;
-  border-radius: 999px;
-  background: rgba(10, 13, 18, 0.9);
-  border: 1px solid var(--line-2);
-  font-size: 11.5px;
-  color: var(--dim);
   pointer-events: none;
-  white-space: nowrap;
 }
-#rotate-hint span { color: var(--acid); font-size: 14px; }
+#btn-reload { font-size: 21px; line-height: 1; }
+#btn-switch, #btn-jump { font-size: 20px; }
+
+/* زر الإيقاف فوق عصا التحكم — خارج مسار زر النار على كل المقاسات */
+#touch-ui #btn-pause {
+  position: fixed;
+  z-index: 5;
+  left: calc(20px + env(safe-area-inset-left));
+  bottom: calc(158px + env(safe-area-inset-bottom));
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+}
+
+/* على الهاتف: الصحة والذخيرة تبقى بالأسفل لكن محصورة بين العصا وزر النار */
+body.is-touch.playing .hud-bottom {
+  left: calc(150px + env(safe-area-inset-left));
+  right: calc(150px + env(safe-area-inset-right));
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  gap: 16px;
+}
+body.is-touch.playing .vitals { width: min(210px, 27vw); }
+body.is-touch.playing #ammo-cur { font-size: 28px; }
+body.is-touch.playing .reload { width: 84px; }
+body.is-touch.playing .ammo { direction: ltr; text-align: right; }
+body.is-touch #boss-bar { top: calc(118px + env(safe-area-inset-top)); }
+body.is-touch #hud-hint {
+  top: calc(96px + env(safe-area-inset-top));
+  bottom: auto;
+}
+
+/* ============ بوابة الاتجاه (هاتف بالطول) ============ */
+#gate {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: none;
+  place-items: center;
+  padding: 26px;
+  text-align: center;
+  background:
+    radial-gradient(60% 55% at 50% 25%, rgba(200, 255, 58, 0.09), transparent 62%),
+    radial-gradient(60% 55% at 50% 100%, rgba(255, 47, 67, 0.07), transparent 62%),
+    #05070a;
+}
+#gate .gate-box {
+  display: grid;
+  justify-items: center;
+  gap: 13px;
+  max-width: 380px;
+}
+#gate h2 { font-size: clamp(22px, 7vw, 30px); letter-spacing: 0.02em; }
+#gate p { font-size: 13px; line-height: 1.95; color: var(--dim); }
+#gate small { font-size: 11.5px; color: var(--dim-2); min-height: 15px; }
+.gate-ico {
+  font-size: 46px;
+  line-height: 1;
+  color: var(--acid);
+  animation: gateTurn 2.6s ease-in-out infinite;
+}
+@keyframes gateTurn {
+  0%, 25% { transform: rotate(0deg); }
+  55%, 100% { transform: rotate(90deg); }
+}
+body.is-touch.portrait.playing #gate { display: grid; }
+body.qa #gate { display: none !important; }
+
+/* زر ملء الشاشة داخل الشريط العلوي */
+.topbar-end { display: flex; align-items: center; gap: 10px; }
+.fs-btn { white-space: nowrap; }
 
 /* =========================================================
    الشاشات
@@ -1443,14 +1503,30 @@ input[type="checkbox"] {
 @media (max-width: 400px) {
   #joy { width: 112px; height: 112px; }
   #joy-knob { width: 48px; height: 48px; }
-  #btn-fire { width: 92px; height: 92px; }
+  #touch-ui #btn-fire { width: 92px; height: 92px; }
   #btn-fire > span { width: 38px; height: 38px; }
+  #touch-ui #btn-pause { bottom: calc(142px + env(safe-area-inset-bottom)); }
 }
 
-/* الهاتف بالطول: تلميح التدوير */
-@media (orientation: portrait) and (max-width: 960px) {
-  body.is-touch #rotate-hint { display: flex; }
-  body.is-touch.playing #rotate-hint { display: none; }
+/* الهاتف بالعرض: مساحة رأسية أقل → HUD مضغوط */
+@media (pointer: coarse) and (orientation: landscape) and (max-height: 480px) {
+  #joy { width: 104px; height: 104px; }
+  #joy-knob { width: 44px; height: 44px; }
+  #touch-ui #btn-fire { width: 84px; height: 84px; }
+  #btn-fire > span { width: 32px; height: 32px; }
+  #touch-ui .touch-col button { width: 46px; height: 46px; font-size: 16px; }
+  #touch-ui #btn-pause { width: 44px; height: 44px; bottom: calc(128px + env(safe-area-inset-bottom)); }
+  .touch-pad { right: calc(16px + env(safe-area-inset-right)); bottom: calc(14px + env(safe-area-inset-bottom)); }
+  #joy { left: calc(16px + env(safe-area-inset-left)); bottom: calc(14px + env(safe-area-inset-bottom)); }
+  body.is-touch.playing .hud-bottom {
+    left: calc(124px + env(safe-area-inset-left));
+    right: calc(160px + env(safe-area-inset-right));
+    bottom: calc(8px + env(safe-area-inset-bottom));
+  }
+  body.is-touch.playing .vitals { width: min(180px, 24vw); }
+  body.is-touch.playing #ammo-cur { font-size: 24px; }
+  body.is-touch #boss-bar { top: calc(104px + env(safe-area-inset-top)); }
+  body.is-touch #hud-hint { top: calc(84px + env(safe-area-inset-top)); }
 }
 
 /* شاشات قصيرة (لابتوب صغير) */

@@ -244,6 +244,7 @@ export class Game {
     const def = LEVELS[Math.min(LEVELS.length, Math.max(1, levelId)) - 1];
     this.levelDef = def;
     this.endless = endless;
+    this.zLevel = endless ? 5 : def.id;
     this.run = {
       levelId: def.id, endless, waveIndex: 0, kills: 0, headshots: 0,
       shots: 0, hits: 0, coins: 0, gems: 0, time: 0, startedAt: performance.now(),
